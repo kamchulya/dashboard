@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Sales HQ</title>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0e11;
+    --surface: #16161a;
+    --surface2: #1e1e24;
+    --border: rgba(255,255,255,0.07);
+    --accent: #a78bfa;
+    --accent2: #34d399;
+    --accent3: #fb923c;
+    --text: #f0f0f4;
+    --muted: #7b7b8e;
+    --danger: #f87171;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Golos Text', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+  }
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 32px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .logo {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+  }
+  .sync-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 7px 16px;
+    border-radius: 8px;
+    font-family: 'Golos Text', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .sync-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .sync-icon { width: 14px; height: 14px; }
+  .nav {
+    display: flex;
+    gap: 2px;
+    padding: 16px 32px 0;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .nav-item {
+    padding: 9px 18px;
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    border-radius: 6px 6px 0 0;
+  }
+  .nav-item:hover { color: var(--text); }
+  .nav-item.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .main { padding: 28px 32px; max-width: 1100px; }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent-color, var(--accent));
+    opacity: 0.6;
+  }
+  .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; }
+  .stat-value { font-family: 'Unbounded', sans-serif; font-size: 26px; font-weight: 600; line-height: 1; }
+  .stat-sub { font-size: 11px; color: var(--muted); margin-top: 6px; }
+  .section-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+  .managers-table {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 28px;
+  }
+  .managers-table table { width: 100%; border-collapse: collapse; }
+  .managers-table th {
+    font-size: 11px;
+    color: var(--muted);
+    text-align: left;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 500;
+    background: var(--surface2);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .managers-table td {
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--text);
+  }
+  .managers-table tr:last-child td { border-bottom: none; }
+  .managers-table tr:hover td { background: var(--surface2); }
+  .avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #a78bfa33, #a78bfa66);
+    border: 1px solid #a78bfa44;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-right: 10px;
+    vertical-align: middle;
+  }
+  .name-cell { display: flex; align-items: center; }
+  .bar-wrap { background: var(--surface2); border-radius: 4px; height: 5px; width: 100%; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; background: var(--accent); transition: width 0.6s ease; }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .badge.fire { background: rgba(251,146,60,0.15); color: var(--accent3); border: 1px solid rgba(251,146,60,0.2); }
+  .badge.start { background: rgba(167,139,250,0.1); color: var(--accent); border: 1px solid rgba(167,139,250,0.15); }
+  .badge.zero { background: rgba(123,123,142,0.1); color: var(--muted); border: 1px solid var(--border); }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .panel-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 16px;
+  }
+  .niche-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .niche-name { font-size: 12px; color: var(--text); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .niche-count { font-size: 12px; color: var(--muted); min-width: 30px; text-align: right; }
+  .niche-bar-wrap { width: 80px; background: var(--surface2); border-radius: 3px; height: 4px; }
+  .niche-bar-fill { height: 100%; border-radius: 3px; background: var(--accent2); }
+  .docs-list { display: flex; flex-direction: column; gap: 8px; }
+  .doc-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--surface2);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    text-decoration: none;
+    color: var(--text);
+    transition: all 0.15s;
+  }
+  .doc-item:hover { border-color: var(--accent); }
+  .doc-icon {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .doc-icon.sheet { background: rgba(52,211,153,0.15); color: var(--accent2); border: 1px solid rgba(52,211,153,0.2); }
+  .doc-icon.doc { background: rgba(167,139,250,0.15); color: var(--accent); border: 1px solid rgba(167,139,250,0.2); }
+  .doc-icon.link { background: rgba(251,146,60,0.15); color: var(--accent3); border: 1px solid rgba(251,146,60,0.2); }
+  .doc-name { font-size: 13px; flex: 1; }
+  .doc-arrow { color: var(--muted); font-size: 12px; }
+  .loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 60px;
+    color: var(--muted);
+    font-size: 13px;
+    gap: 10px;
+  }
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .pane { display: none; }
+  .pane.active { display: block; }
+  .last-updated { font-size: 11px; color: var(--muted); }
+  .activity-log { display: flex; flex-direction: column; gap: 0; }
+  .activity-row {
+    display: flex;
+    gap: 12px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--border);
+    align-items: flex-start;
+    font-size: 13px;
+  }
+  .activity-row:last-child { border-bottom: none; }
+  .activity-date { color: var(--muted); font-size: 11px; white-space: nowrap; min-width: 70px; padding-top: 2px; }
+  .activity-name { font-weight: 600; color: var(--accent); min-width: 80px; }
+  .activity-text { color: var(--text); flex: 1; }
+  .highlight { color: var(--accent2); font-weight: 600; }
+  .empty { color: var(--muted); font-size: 13px; text-align: center; padding: 32px; }
+  @media (max-width: 640px) {
+    .header { padding: 14px 16px; }
+    .nav { padding: 12px 16px 0; }
+    .main { padding: 16px; }
+    .two-col { grid-template-columns: 1fr; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-dot"></div>
+    AI Sales HQ
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span class="last-updated" id="lastUpdated">—</span>
+    <button class="sync-btn" onclick="loadData()">
+      <svg class="sync-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M13.5 8A5.5 5.5 0 1 1 8 2.5c2 0 3.7.9 4.8 2.3"/>
+        <polyline points="10,2 14,2 14,6"/>
+      </svg>
+      Обновить
+    </button>
+  </div>
+</div>
+
+<div class="nav">
+  <div class="nav-item active" onclick="showPane('dashboard')">Дашборд</div>
+  <div class="nav-item" onclick="showPane('managers')">Менеджеры</div>
+  <div class="nav-item" onclick="showPane('activity')">Активность</div>
+  <div class="nav-item" onclick="showPane('docs')">Документы</div>
+</div>
+
+<div class="main">
+
+  <!-- DASHBOARD -->
+  <div class="pane active" id="pane-dashboard">
+    <div id="stats-loading" class="loading"><div class="spinner"></div> Загрузка данных…</div>
+    <div id="stats-content" style="display:none;">
+      <div class="stats-grid" id="statsGrid"></div>
+      <div class="two-col">
+        <div class="panel">
+          <div class="panel-title">Менеджеры — сводка</div>
+          <div id="managersMini"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">Продажи по нишам</div>
+          <div id="nichesMini"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MANAGERS -->
+  <div class="pane" id="pane-managers">
+    <div class="managers-table" id="managersTable">
+      <div class="loading"><div class="spinner"></div> Загрузка…</div>
+    </div>
+  </div>
+
+  <!-- ACTIVITY -->
+  <div class="pane" id="pane-activity">
+    <div class="panel">
+      <div class="panel-title">Последние записи</div>
+      <div class="activity-log" id="activityLog">
+        <div class="loading"><div class="spinner"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DOCS -->
+  <div class="pane" id="pane-docs">
+    <div class="panel">
+      <div class="panel-title">Документы и ссылки</div>
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:10px;">Договора и брифы</div>
+      <div class="docs-list" style="margin-bottom:20px;">
+        <a class="doc-item" href="https://docs.google.com/document/d/1iJycRA_Hv4pg_KNQ6UQezvvUm0QvJW7i/edit" target="_blank">
+          <div class="doc-icon doc">Д</div>
+          <span class="doc-name">Агентский договор Адема</span>
+          <span class="doc-arrow">↗</span>
+        </a>
+        <a class="doc-item" href="https://docs.google.com/document/d/1NdM-LdMBQHleqQ5wDSCGvzYUTbnTFVon/edit" target="_blank">
+          <div class="doc-icon doc">Б</div>
+          <span class="doc-name">Бриф chatbot — bref_chatbot.docx</span>
+          <span class="doc-arrow">↗</span>
+        </a>
+      </div>
+
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:10px;">Демо-презентации</div>
+      <div class="docs-list" style="margin-bottom:20px;">
+        <a class="doc-item" href="https://kamchulya.github.io/barpresentation/" target="_blank">
+          <div class="doc-icon link" style="background:rgba(251,146,60,0.15);color:var(--accent3);border:1px solid rgba(251,146,60,0.2);">П</div>
+          <span class="doc-name">Презентация — кафе / бар / доставка / рестораны</span>
+          <span class="doc-arrow">↗</span>
+        </a>
+        <a class="doc-item" href="https://kamchulya.github.io/demoflowers/" target="_blank">
+          <div class="doc-icon link" style="background:rgba(251,146,60,0.15);color:var(--accent3);border:1px solid rgba(251,146,60,0.2);">П</div>
+          <span class="doc-name">Демо — цветочные</span>
+          <span class="doc-arrow">↗</span>
+        </a>
+        <a class="doc-item" href="https://kamchulya.github.io/dental-presentation/" target="_blank">
+          <div class="doc-icon link" style="background:rgba(251,146,60,0.15);color:var(--accent3);border:1px solid rgba(251,146,60,0.2);">П</div>
+          <span class="doc-name">Презентация — стоматологии</span>
+          <span class="doc-arrow">↗</span>
+        </a>
+        <a class="doc-item" href="https://kamchulya.github.io/demobot" target="_blank">
+          <div class="doc-icon link" style="background:rgba(167,139,250,0.15);color:var(--accent);border:1px solid rgba(167,139,250,0.2);">Д</div>
+          <span class="doc-name">Демо бота</span>
+          <span class="doc-arrow">↗</span>
+        </a>
+        <a class="doc-item" href="https://kamchulya.github.io/scriptupd/" target="_blank">
+          <div class="doc-icon link" style="background:rgba(52,211,153,0.15);color:var(--accent2);border:1px solid rgba(52,211,153,0.2);">С</div>
+          <span class="doc-name">Скрипт продаж (обновлённый)</span>
+          <span class="doc-arrow">↗</span>
+        </a>
+      </div>
+
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:10px;">Таблицы</div>
+      <div class="docs-list">
+        <a class="doc-item" href="https://docs.google.com/spreadsheets/d/1Qo9EOY87azYMm_1dnqV0saP1kAritmAkKdPgpNGrpDw/edit" target="_blank">
+          <div class="doc-icon sheet">G</div>
+          <span class="doc-name">ChatBot_продажи — основная таблица</span>
+          <span class="doc-arrow">↗</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const SHEET_ID = '1Qo9EOY87azYMm_1dnqV0saP1kAritmAkKdPgpNGrpDw';
+const API_KEY = 'AIzaSyD2xnVB0_OPWq_w8zPrMnD2AuE4q6dVb0g'; // замени на свой ключ
+
+let data = { managers: [], niches: [], rows: [], totals: {} };
+
+function showPane(name) {
+  document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+  document.getElementById('pane-' + name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach((el, i) => {
+    el.classList.toggle('active', ['dashboard','managers','activity','docs'][i] === name);
+  });
+}
+
+async function loadData() {
+  const btn = document.querySelector('.sync-btn');
+  btn.style.opacity = '0.5';
+
+  try {
+    // Используем публичный CSV-экспорт — не требует API ключа!
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=%F0%9F%93%8A%20%D0%94%D0%B0%D1%88%D0%B1%D0%BE%D1%80%D0%B4`;
+    // Пробуем загрузить первый лист (Отчёт)
+    await loadFromCSV();
+  } catch(e) {
+    console.error(e);
+    renderFromSample();
+  }
+  btn.style.opacity = '1';
+}
+
+async function loadFromCSV() {
+  try {
+    // CSV экспорт первого листа
+    const r = await fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0`);
+    if (!r.ok) throw new Error('not ok');
+    const text = await r.text();
+    parseCSV(text);
+  } catch(e) {
+    // Если лист не публичный — показываем данные из документа (уже прочитанные)
+    renderFromSample();
+  }
+}
+
+function parseCSV(text) {
+  const lines = text.split('\n').map(l => l.split(','));
+  // Попробуем найти строки с данными
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    const l = lines[i];
+    if (l.length < 8) continue;
+    const date = l[0]?.trim();
+    const manager = l[1]?.trim();
+    if (!date || !manager || !date.match(/\d{2}\.\d{2}\.\d{4}/)) continue;
+    rows.push({
+      date, manager,
+      niche: l[2]?.trim(),
+      city: l[3]?.trim(),
+      written: parseInt(l[4]) || 0,
+      replied: parseInt(l[5]) || 0,
+      sold: parseInt(l[7]) || 0,
+      payout: parseInt((l[9]||'').replace(/\D/g,'')) || 0,
+      status: l[10]?.trim() || ''
+    });
+  }
+  if (rows.length === 0) { renderFromSample(); return; }
+  processAndRender(rows);
+}
+
+function renderFromSample() {
+  // Данные из таблицы (прочитаны ранее)
+  const rows = [
+    { date:'15.04.2026', manager:'Камшат', niche:'Интернет-магазины', city:'Астана', written:114, replied:68, sold:4, payout:60000, status:'Огонь' },
+    { date:'15.04.2026', manager:'Арай', niche:'Интернет-магазины', city:'Алматы', written:14, replied:6, sold:0, payout:0, status:'В процессе' },
+    { date:'15.04.2026', manager:'Аяжан', niche:'Рестораны/кафе', city:'Шымкент', written:0, replied:0, sold:0, payout:0, status:'В процессе' },
+    { date:'15.04.2026', manager:'Константин', niche:'Фитнес/спортзалы', city:'Астана', written:17, replied:8, sold:0, payout:0, status:'В процессе' },
+    { date:'16.04.2026', manager:'Рустем', niche:'Рестораны/кафе', city:'Астана', written:9, replied:4, sold:0, payout:0, status:'' },
+    { date:'16.04.2026', manager:'Константин', niche:'Фитнес/спортзалы', city:'Астана', written:15, replied:6, sold:0, payout:0, status:'В процессе' },
+    { date:'17.04.2026', manager:'Камшат', niche:'Интернет-магазины', city:'Актобе', written:5, replied:0, sold:0, payout:0, status:'' },
+    { date:'19.04.2026', manager:'Константин', niche:'Фитнес/спортзалы', city:'Астана', written:43, replied:11, sold:0, payout:0, status:'В процессе' },
+    { date:'20.04.2026', manager:'Константин', niche:'Фитнес/спортзалы', city:'Астана', written:15, replied:5, sold:0, payout:0, status:'В процессе' },
+  ];
+  processAndRender(rows);
+}
+
+function processAndRender(rows) {
+  data.rows = rows;
+
+  // Aggregate by manager
+  const mgMap = {};
+  rows.forEach(r => {
+    if (!mgMap[r.manager]) mgMap[r.manager] = { name: r.manager, written:0, replied:0, sold:0, payout:0, days:0 };
+    mgMap[r.manager].written += r.written;
+    mgMap[r.manager].replied += r.replied;
+    mgMap[r.manager].sold += r.sold;
+    mgMap[r.manager].payout += r.payout;
+    mgMap[r.manager].days++;
+  });
+  data.managers = Object.values(mgMap).sort((a,b) => b.sold - a.sold || b.written - a.written);
+
+  // Aggregate by niche
+  const nMap = {};
+  rows.forEach(r => {
+    if (!r.niche) return;
+    if (!nMap[r.niche]) nMap[r.niche] = { name: r.niche, written:0, sold:0 };
+    nMap[r.niche].written += r.written;
+    nMap[r.niche].sold += r.sold;
+  });
+  data.niches = Object.values(nMap).sort((a,b) => b.written - a.written);
+
+  // Totals
+  data.totals = {
+    written: rows.reduce((s,r) => s + r.written, 0),
+    replied: rows.reduce((s,r) => s + r.replied, 0),
+    sold: rows.reduce((s,r) => s + r.sold, 0),
+    payout: rows.reduce((s,r) => s + r.payout, 0),
+    managers: data.managers.length
+  };
+
+  renderDashboard();
+  renderManagers();
+  renderActivity();
+
+  document.getElementById('stats-loading').style.display = 'none';
+  document.getElementById('stats-content').style.display = 'block';
+  document.getElementById('lastUpdated').textContent = 'Обновлено: ' + new Date().toLocaleTimeString('ru-RU', {hour:'2-digit',minute:'2-digit'});
+}
+
+function renderDashboard() {
+  const t = data.totals;
+  const replyRate = t.written > 0 ? Math.round(t.replied / t.written * 100) : 0;
+  const convRate = t.written > 0 ? Math.round(t.sold / t.written * 100) : 0;
+
+  document.getElementById('statsGrid').innerHTML = `
+    <div class="stat-card" style="--accent-color:var(--accent)">
+      <div class="stat-label">Написано</div>
+      <div class="stat-value">${t.written}</div>
+      <div class="stat-sub">аккаунтов всего</div>
+    </div>
+    <div class="stat-card" style="--accent-color:var(--accent2)">
+      <div class="stat-label">Ответили</div>
+      <div class="stat-value">${t.replied}</div>
+      <div class="stat-sub">${replyRate}% конверсия</div>
+    </div>
+    <div class="stat-card" style="--accent-color:var(--accent3)">
+      <div class="stat-label">Продано ботов</div>
+      <div class="stat-value">${t.sold}</div>
+      <div class="stat-sub">${convRate}% из написанных</div>
+    </div>
+    <div class="stat-card" style="--accent-color:var(--accent2)">
+      <div class="stat-label">Выплачено</div>
+      <div class="stat-value">${(t.payout/1000).toFixed(0)}к ₸</div>
+      <div class="stat-sub">менеджерам</div>
+    </div>
+    <div class="stat-card" style="--accent-color:var(--accent)">
+      <div class="stat-label">Менеджеров</div>
+      <div class="stat-value">${t.managers}</div>
+      <div class="stat-sub">активных</div>
+    </div>
+  `;
+
+  const maxW = Math.max(...data.managers.map(m => m.written), 1);
+  document.getElementById('managersMini').innerHTML = data.managers.map(m => `
+    <div style="margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+        <span style="font-size:13px;">${m.name}</span>
+        <span style="font-size:12px;color:var(--muted);">${m.written} касаний · ${m.sold} продаж</span>
+      </div>
+      <div class="bar-wrap"><div class="bar-fill" style="width:${Math.round(m.written/maxW*100)}%"></div></div>
+    </div>
+  `).join('');
+
+  const maxNW = Math.max(...data.niches.map(n => n.written), 1);
+  document.getElementById('nichesMini').innerHTML = data.niches.map(n => `
+    <div class="niche-row">
+      <span class="niche-name">${n.name}</span>
+      <div class="niche-bar-wrap"><div class="niche-bar-fill" style="width:${Math.round(n.written/maxNW*100)}%"></div></div>
+      <span class="niche-count">${n.written}</span>
+    </div>
+  `).join('');
+}
+
+function renderManagers() {
+  const rows = data.managers;
+  if (!rows.length) { document.getElementById('managersTable').innerHTML = '<div class="empty">Нет данных</div>'; return; }
+  const maxW = Math.max(...rows.map(m => m.written), 1);
+  document.getElementById('managersTable').innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>Менеджер</th>
+          <th>Написано</th>
+          <th>Ответили</th>
+          <th>% ответа</th>
+          <th>Продано</th>
+          <th>Конверсия</th>
+          <th>Выплата</th>
+          <th>Статус</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows.map(m => {
+          const rr = m.written > 0 ? Math.round(m.replied/m.written*100) : 0;
+          const cr = m.written > 0 ? Math.round(m.sold/m.written*100) : 0;
+          const initials = m.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+          const badgeCls = m.sold > 0 ? 'fire' : m.written > 10 ? 'start' : 'zero';
+          const badgeTxt = m.sold > 0 ? '🔥 Огонь' : m.written > 10 ? '⏳ Старт' : '— Нет данных';
+          return `<tr>
+            <td><div class="name-cell"><div class="avatar">${initials}</div>${m.name}</div></td>
+            <td>
+              ${m.written}
+              <div class="bar-wrap" style="margin-top:5px;width:80px;"><div class="bar-fill" style="width:${Math.round(m.written/maxW*100)}%"></div></div>
+            </td>
+            <td>${m.replied}</td>
+            <td style="color:${rr>50?'var(--accent2)':rr>30?'var(--text)':'var(--danger)'}">${rr}%</td>
+            <td style="font-weight:600;color:${m.sold>0?'var(--accent2)':'var(--muted)'}">${m.sold}</td>
+            <td>${cr}%</td>
+            <td>${m.payout > 0 ? m.payout.toLocaleString('ru-RU') + ' ₸' : '—'}</td>
+            <td><span class="badge ${badgeCls}">${badgeTxt}</span></td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+function renderActivity() {
+  const rows = [...data.rows].reverse().slice(0, 20);
+  if (!rows.length) { document.getElementById('activityLog').innerHTML = '<div class="empty">Нет данных</div>'; return; }
+  document.getElementById('activityLog').innerHTML = rows.map(r => `
+    <div class="activity-row">
+      <span class="activity-date">${r.date}</span>
+      <span class="activity-name">${r.manager || '—'}</span>
+      <span class="activity-text">
+        ${r.niche}, ${r.city} —
+        написано <span class="highlight">${r.written}</span>,
+        ответили ${r.replied}
+        ${r.sold > 0 ? `· <span style="color:var(--accent3);font-weight:600;">продано ${r.sold} 🎉</span>` : ''}
+      </span>
+    </div>
+  `).join('');
+}
+
+loadData();
+</script>
+</body>
+</html>
